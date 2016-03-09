@@ -9,6 +9,11 @@ import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.extensions.android.json.AndroidJsonFactory;
+import com.lukeinnovationlab.clouddevicemanager.backend.registration.Registration;
+
+import java.io.IOException;
 
 /**
  * RegistrationIntentService.
@@ -64,13 +69,17 @@ public class RegistrationIntentService extends IntentService {
 
     /**
      * Persist registration to third-party servers.
-     * <p/>
+     * <p>
      * Modify this method to associate the user's GCM registration token with any server-side
      * account maintained by your application.
      *
      * @param token The new token.
      */
-    private void sendRegistrationToServer(String token) {
-        // Add custom implementation, as needed.
+    private void sendRegistrationToServer(String token) throws IOException {
+        Registration.Builder builder = new Registration.Builder(AndroidHttp.newCompatibleTransport(),
+                new AndroidJsonFactory(), null)
+                .setRootUrl("https://clouddevicemanager2016.appspot.com/_ah/api/");
+        Registration regService = builder.build();
+        regService.register(token).execute();
     }
 }

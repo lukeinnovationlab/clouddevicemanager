@@ -11,7 +11,8 @@
         "client_id": "android:com.lukeinnovationlab.clouddevicemanager",
         "client_type": 1,
         "android_client_info": {
-          "package_name": "com.lukeinnovationlab.clouddevicemanager"
+          "package_name": "com.lukeinnovationlab.clouddevicemanager",
+          "certificate_hash": []
         }
       },
       "oauth_client": [],

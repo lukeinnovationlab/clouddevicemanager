@@ -22,13 +22,20 @@ public class DeviceGcmListenerService extends GcmListenerService {
     @Override
     public void onMessageReceived(String from, Bundle data) {
         String message = data.getString("message");
-        Log.d(TAG, "From: " + from);
-        Log.d(TAG, "Message: " + message);
+
+        if (getString(R.string.gcm_defaultSenderId).equals(from)) {
+            Log.d(TAG, "Message \"" +  message + "\" from CloudDeviceManager (" + from + ")");
+        } else {
+            Log.d(TAG, "Message \"" +  message + "\" from unknown sender (" + from + ")");
+            return;
+        }
 
         if (from.startsWith("/topics/")) {
             // message received from some topic.
+            // N/A
         } else {
             // normal downstream message.
+
         }
 
         // [START_EXCLUDE]

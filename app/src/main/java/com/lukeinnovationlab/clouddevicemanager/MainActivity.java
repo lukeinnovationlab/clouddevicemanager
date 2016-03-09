@@ -1,5 +1,6 @@
 package com.lukeinnovationlab.clouddevicemanager;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -33,7 +34,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        checkPlayServices();
+        if (checkPlayServices()) {
+            // Start IntentService to register this application with GCM.
+            Intent intent = new Intent(this, RegistrationIntentService.class);
+            startService(intent);
+        }
     }
 
     @Override
