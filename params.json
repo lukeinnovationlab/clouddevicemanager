@@ -1,0 +1,6 @@
+{
+  "name": "Clouddevicemanager",
+  "tagline": "Cloud Device Manager",
+  "body": "Welcome to Cloud Device Manager!\r\n\r\nThe project is to develop an app to allow an user manage devices online. \r\n\r\nThe project takes the advantage of Google Cloud Messaging.\r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
