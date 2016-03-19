@@ -45,7 +45,7 @@ public class RegistrationIntentService extends IntentService {
             // [END get_token]
             Log.i(TAG, "GCM Registration Token: " + token);
 
-            // TODO: Implement this method to send any registration to your app's servers.
+            // To send any registration to your app's servers.
             sendRegistrationToServer(token);
 
             // You should store a boolean that indicates whether the generated token has been
@@ -69,16 +69,16 @@ public class RegistrationIntentService extends IntentService {
 
     /**
      * Persist registration to third-party servers.
-     * <p>
+     * <p/>
      * Modify this method to associate the user's GCM registration token with any server-side
      * account maintained by your application.
      *
      * @param token The new token.
      */
     private void sendRegistrationToServer(String token) throws IOException {
-        Registration.Builder builder = new Registration.Builder(AndroidHttp.newCompatibleTransport(),
-                new AndroidJsonFactory(), null)
-                .setRootUrl("https://clouddevicemanager2016.appspot.com/_ah/api/");
+        Registration.Builder builder = new Registration.Builder(AndroidHttp
+                .newCompatibleTransport(), new AndroidJsonFactory(), null).setRootUrl
+                ("https://clouddevicemanager2016.appspot.com/_ah/api/");
         Registration regService = builder.build();
         regService.register(token).execute();
     }
