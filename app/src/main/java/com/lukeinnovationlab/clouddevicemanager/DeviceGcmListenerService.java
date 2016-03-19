@@ -4,6 +4,9 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GcmListenerService;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+
+import java.io.IOException;
 
 /**
  * Service handles GCM messages.
@@ -24,17 +27,32 @@ public class DeviceGcmListenerService extends GcmListenerService {
         String message = data.getString("message");
 
         if (getString(R.string.gcm_defaultSenderId).equals(from)) {
-            Log.d(TAG, "Message \"" +  message + "\" from CloudDeviceManager (" + from + ")");
+            Log.d(TAG, "Message \"" + message + "\" from CloudDeviceManager (" + from + ")");
         } else {
-            Log.d(TAG, "Message \"" +  message + "\" from unknown sender (" + from + ")");
+            Log.d(TAG, "Message \"" + message + "\" from unknown sender (" + from + ")");
             return;
         }
 
         if (from.startsWith("/topics/")) {
             // message received from some topic.
             // N/A
+            return;
         } else {
             // normal downstream message.
+            final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this
+                    .getApplicationContext());
+            final String senderId = getString(R.string.gcm_defaultSenderId);
+            final String msgId = "1001";
+
+            Bundle uploadData = new Bundle();
+            uploadData.putString("my_message", "Hello World");
+            uploadData.putString("my_action", "SAY_HELLO");
+
+            try {
+                gcm.send(senderId + "@gcm.googleapis.com", msgId, uploadData);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
         }
 
@@ -47,6 +65,16 @@ public class DeviceGcmListenerService extends GcmListenerService {
          */
 
         // [END_EXCLUDE]
+    }
+
+    @Override
+    public void onMessageSent(String msgId) {
+        Log.d(TAG, "onMessageSent: " + msgId);
+    }
+
+    @Override
+    public void onSendError(String msgId, String error) {
+        Log.d(TAG, "onSendError: " + msgId + ", " + error);
     }
     // [END receive_message]
 }
