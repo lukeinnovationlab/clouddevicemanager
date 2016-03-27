@@ -1,8 +1,7 @@
 package com.lukeinnovationlab.clouddevicemanager;
 
-import android.content.Context;
 import android.os.Bundle;
-import android.telephony.TelephonyManager;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GcmListenerService;
@@ -59,16 +58,16 @@ public class DeviceGcmListenerService extends GcmListenerService {
         final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this
                 .getApplicationContext());
         final String senderId = getString(R.string.gcm_defaultSenderId);
-        final String msgId = String.valueOf(System.currentTimeMillis());
-
-        String userName = getUserName();
-        String deviceId = getDeviceId();
-        Bundle uploadData = new Bundle();
+        final String msgId = getMessageId();
+        final String userName = getUserName();
+        final String deviceId = getDeviceId();
+        final Bundle uploadData = new Bundle();
         uploadData.putString("username", userName);
         uploadData.putString("deviceid", deviceId);
 
         try {
             gcm.send(senderId + "@gcm.googleapis.com", msgId, uploadData);
+            Log.d(TAG, "Msg up: " + msgId + "/" + uploadData);
         } catch (IOException e) {
             Log.e(TAG, "Failed to send via GCM for msg: " + msgId);
         }
@@ -84,14 +83,16 @@ public class DeviceGcmListenerService extends GcmListenerService {
         Log.d(TAG, "onSendError: " + msgId + ", " + error);
     }
 
-    public String getUserName() {
+    private String getMessageId() {
+        return String.valueOf(System.currentTimeMillis());
+    }
+
+    private String getUserName() {
         return "tester1";
     }
 
-    public String getDeviceId() {
-        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context
-                .TELEPHONY_SERVICE);
-        return telephonyManager.getDeviceId();
+    private String getDeviceId() {
+        return Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
     }
     // [END receive_message]
 }
