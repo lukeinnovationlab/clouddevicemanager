@@ -1,6 +1,8 @@
 package com.lukeinnovationlab.clouddevicemanager;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GcmListenerService;
@@ -35,25 +37,11 @@ public class DeviceGcmListenerService extends GcmListenerService {
 
         if (from.startsWith("/topics/")) {
             // message received from some topic.
-            // N/A
-            return;
+            Log.d(TAG, "Message received from topic: " + from);
         } else {
             // normal downstream message.
-            final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this
-                    .getApplicationContext());
-            final String senderId = getString(R.string.gcm_defaultSenderId);
-            final String msgId = "1001";
-
-            Bundle uploadData = new Bundle();
-            uploadData.putString("my_message", "Hello World");
-            uploadData.putString("my_action", "SAY_HELLO");
-
-            try {
-                gcm.send(senderId + "@gcm.googleapis.com", msgId, uploadData);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
+            Log.d(TAG, "Normal downstream message");
+            replyMessage();
         }
 
         // [START_EXCLUDE]
@@ -67,6 +55,25 @@ public class DeviceGcmListenerService extends GcmListenerService {
         // [END_EXCLUDE]
     }
 
+    private void replyMessage() {
+        final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this
+                .getApplicationContext());
+        final String senderId = getString(R.string.gcm_defaultSenderId);
+        final String msgId = String.valueOf(System.currentTimeMillis());
+
+        String userName = getUserName();
+        String deviceId = getDeviceId();
+        Bundle uploadData = new Bundle();
+        uploadData.putString("username", userName);
+        uploadData.putString("deviceid", deviceId);
+
+        try {
+            gcm.send(senderId + "@gcm.googleapis.com", msgId, uploadData);
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to send via GCM for msg: " + msgId);
+        }
+    }
+
     @Override
     public void onMessageSent(String msgId) {
         Log.d(TAG, "onMessageSent: " + msgId);
@@ -75,6 +82,16 @@ public class DeviceGcmListenerService extends GcmListenerService {
     @Override
     public void onSendError(String msgId, String error) {
         Log.d(TAG, "onSendError: " + msgId + ", " + error);
+    }
+
+    public String getUserName() {
+        return "tester1";
+    }
+
+    public String getDeviceId() {
+        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context
+                .TELEPHONY_SERVICE);
+        return telephonyManager.getDeviceId();
     }
     // [END receive_message]
 }

@@ -6,7 +6,10 @@
       <w>appengine</w>
       <w>appinvite</w>
       <w>clouddevicemanager</w>
+      <w>datastore</w>
+      <w>deviceid</w>
       <w>googlecloudmessaging</w>
+      <w>googlecode</w>
       <w>lukeinnovationlab</w>
       <w>mobilesdk</w>
       <w>signin</w>

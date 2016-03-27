@@ -11,7 +11,11 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
+import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
+import com.google.api.client.googleapis.services.GoogleClientRequestInitializer;
 import com.lukeinnovationlab.clouddevicemanager.backend.registration.Registration;
+
+import java.io.IOException;
 
 /**
  * RegistrationIntentService.
@@ -35,7 +39,7 @@ public class RegistrationIntentService extends IntentService {
 
     /**
      * Persist registration to third-party servers.
-     * <p>
+     * <p/>
      * Modify this method to associate the user's GCM registration token with any server-side
      * account maintained by your application.
      */
@@ -58,10 +62,8 @@ public class RegistrationIntentService extends IntentService {
             Log.i(TAG, "GCM Registration Token: " + token);
 
             // To send any registration to your app's servers.
-            Registration.Builder builder = new Registration.Builder(AndroidHttp
-                    .newCompatibleTransport(), new AndroidJsonFactory(), null).setRootUrl
-                    ("https://clouddevicemanager2016.appspot.com/_ah/api/");
-            Registration regService = builder.build();
+            Registration regService = Configuration.isLocalMode() ? getLocalRegistrationService() :
+                    getProductRegistrationService();
             regService.register(token).execute();
 
             // You should store a boolean that indicates whether the generated token has been
@@ -78,5 +80,29 @@ public class RegistrationIntentService extends IntentService {
             sharedPreferences.edit().putBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER,
                     false).apply();
         }
+    }
+
+    private Registration getProductRegistrationService() {
+        Registration.Builder builder = new Registration.Builder(AndroidHttp
+                .newCompatibleTransport(), new AndroidJsonFactory(), null)
+                .setRootUrl("https://clouddevicemanager2016.appspot.com/_ah/api/");
+        return builder.build();
+    }
+
+    private Registration getLocalRegistrationService() {
+        Registration.Builder builder = new Registration.Builder(AndroidHttp
+                .newCompatibleTransport(),
+                new AndroidJsonFactory(), null)
+                // Need setRootUrl and setGoogleClientRequestInitializer only for local testing,
+                // otherwise they can be skipped
+                .setRootUrl("http://10.0.2.2:8080/_ah/api/")
+                .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
+                    @Override
+                    public void initialize(AbstractGoogleClientRequest<?>
+                                                   abstractGoogleClientRequest) throws IOException {
+                        abstractGoogleClientRequest.setDisableGZipContent(true);
+                    }
+                });
+        return builder.build();
     }
 }
