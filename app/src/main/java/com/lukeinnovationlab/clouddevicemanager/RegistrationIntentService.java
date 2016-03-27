@@ -13,8 +13,6 @@ import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.lukeinnovationlab.clouddevicemanager.backend.registration.Registration;
 
-import java.io.IOException;
-
 /**
  * RegistrationIntentService.
  */
@@ -28,6 +26,20 @@ public class RegistrationIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        sendRegistrationToServer();
+
+        // Notify UI that registration has completed, so the progress indicator can be hidden.
+        Intent registrationComplete = new Intent(QuickstartPreferences.REGISTRATION_COMPLETE);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(registrationComplete);
+    }
+
+    /**
+     * Persist registration to third-party servers.
+     * <p>
+     * Modify this method to associate the user's GCM registration token with any server-side
+     * account maintained by your application.
+     */
+    private void sendRegistrationToServer() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         try {
@@ -46,7 +58,11 @@ public class RegistrationIntentService extends IntentService {
             Log.i(TAG, "GCM Registration Token: " + token);
 
             // To send any registration to your app's servers.
-            sendRegistrationToServer(token);
+            Registration.Builder builder = new Registration.Builder(AndroidHttp
+                    .newCompatibleTransport(), new AndroidJsonFactory(), null).setRootUrl
+                    ("https://clouddevicemanager2016.appspot.com/_ah/api/");
+            Registration regService = builder.build();
+            regService.register(token).execute();
 
             // You should store a boolean that indicates whether the generated token has been
             // sent to your server. If the boolean is false, send the token to your server,
@@ -62,24 +78,5 @@ public class RegistrationIntentService extends IntentService {
             sharedPreferences.edit().putBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER,
                     false).apply();
         }
-        // Notify UI that registration has completed, so the progress indicator can be hidden.
-        Intent registrationComplete = new Intent(QuickstartPreferences.REGISTRATION_COMPLETE);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(registrationComplete);
-    }
-
-    /**
-     * Persist registration to third-party servers.
-     * <p/>
-     * Modify this method to associate the user's GCM registration token with any server-side
-     * account maintained by your application.
-     *
-     * @param token The new token.
-     */
-    private void sendRegistrationToServer(String token) throws IOException {
-        Registration.Builder builder = new Registration.Builder(AndroidHttp
-                .newCompatibleTransport(), new AndroidJsonFactory(), null).setRootUrl
-                ("https://clouddevicemanager2016.appspot.com/_ah/api/");
-        Registration regService = builder.build();
-        regService.register(token).execute();
     }
 }
